@@ -25,8 +25,9 @@ export default function SeoCheckerPage() {
   }));
 
   return (
-    <Container className="py-12 sm:py-16">
-      <div className="mx-auto max-w-3xl text-center">
+    <Container className="relative py-12 sm:py-16">
+      <div className="wash-accent pointer-events-none absolute inset-x-0 top-0 h-72" aria-hidden="true" />
+      <div className="relative mx-auto max-w-3xl text-center">
         <SectionLabel>SEO Checker</SectionLabel>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
           Analyze a page

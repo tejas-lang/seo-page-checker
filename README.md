@@ -66,7 +66,9 @@ enforce them.
   calculation is shown on each report, and the same page always produces the
   same number. No AI writes any part of an audit.
 - **We say what we cannot do.** No rankings, no backlinks, no authority score,
-  no Core Web Vitals, no indexing status.
+  no indexing status. Where outside data is shown — Core Web Vitals from the
+  Google PageSpeed Insights API — it is attributed to Google and kept out of
+  the score.
 
 ---
 
@@ -409,6 +411,11 @@ anything else.
   data sources no external tool has.
 - **It is not a rich results test.** It confirms your JSON-LD is valid JSON and
   lists its types. Eligibility rules are not fully published.
+- **Speed data is Google's, not ours.** The PageSpeed panel is a live call to
+  Google's API. It needs an API key, has its own rate limit, and takes 10–30
+  seconds — which is why it is requested on demand rather than with every
+  audit. It never affects the SEO score, because Lighthouse results vary
+  between runs and the score must not.
 - **Its robots.txt parser is honest about its limits.** Where a file uses
   patterns different crawlers interpret differently, it reports "potentially
   blocked" rather than asserting a wrong answer.
@@ -439,10 +446,10 @@ The next five features, in the order I would build them:
    outbound link and reports its status. It must be opt-in and rate-limited —
    this is the one feature that turns a page checker into something that could
    annoy other people's servers.
-2. **Google PageSpeed Insights integration.** A real API with a free tier,
-   which would add genuine Core Web Vitals data. The architecture already
-   separates checks from the engine, so this is a new check module plus an API
-   key.
+2. ~~**Google PageSpeed Insights integration.**~~ **Done.** Reports fetch live
+   Core Web Vitals and Lighthouse results on demand. Set `PAGESPEED_API_KEY` to
+   enable it; without a key the panel says so plainly rather than showing
+   anything invented.
 3. **Accounts and saved history.** The `User` model already exists in the schema
    for exactly this. It brings higher rate limits and the ability to compare a
    page against its own past audits.

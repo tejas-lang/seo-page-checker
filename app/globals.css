@@ -13,23 +13,40 @@
  */
 
 @theme {
-  /* -- Brand: a deep navy that reads as near-black at small sizes -------- */
-  --color-ink-50: #f6f7f9;
-  --color-ink-100: #eceef2;
-  --color-ink-200: #d4d9e2;
-  --color-ink-300: #adb7c8;
-  --color-ink-400: #7f8da8;
-  --color-ink-500: #5f6f8c;
-  --color-ink-600: #4a5872;
-  --color-ink-700: #3d485d;
-  --color-ink-800: #353d4e;
-  --color-ink-900: #131a29;
-  --color-ink-950: #0b1220;
+  /* -- Brand: a deep navy that reads as near-black at small sizes --------
+     The steps carry a touch of warmth rather than the usual cool slate, so
+     large areas of text and surface feel less clinical without the palette
+     losing its seriousness. */
+  --color-ink-50: #f8f7f6;
+  --color-ink-100: #efeeec;
+  --color-ink-200: #dcdad6;
+  --color-ink-300: #b8b4ad;
+  --color-ink-400: #8b8781;
+  --color-ink-500: #6b6862;
+  --color-ink-600: #524f4a;
+  --color-ink-700: #423f3b;
+  --color-ink-800: #36332f;
+  --color-ink-900: #1c1a18;
+  --color-ink-950: #12100e;
+
+  /* -- Accent: a violet used for brand moments and emphasis --------------
+     Chosen because it sits clear of all four semantic colours (green, amber,
+     red, blue), so an accent flourish can never be mistaken for a status. */
+  --color-accent-50: #f5f3ff;
+  --color-accent-100: #ede9fe;
+  --color-accent-200: #ddd6fe;
+  --color-accent-300: #c4b5fd;
+  --color-accent-400: #a78bfa;
+  --color-accent-500: #8b5cf6;
+  --color-accent-600: #7c3aed;
+  --color-accent-700: #6d28d9;
+  --color-accent-800: #5b21b6;
+  --color-accent-900: #4c1d95;
 
   /* -- Surfaces ---------------------------------------------------------- */
-  --color-canvas: #f7f8fa;
+  --color-canvas: #faf9f7;
   --color-surface: #ffffff;
-  --color-surface-muted: #fafbfc;
+  --color-surface-muted: #faf9f7;
 
   /* -- Semantic status colours ------------------------------------------ */
   --color-success: #16a34a;
@@ -52,8 +69,8 @@
   --color-info-border: #bfdbfe;
   --color-info-ink: #1d4ed8;
 
-  --color-neutral-soft: #f4f5f7;
-  --color-neutral-border: #e2e5ea;
+  --color-neutral-soft: #f4f3f1;
+  --color-neutral-border: #e6e3de;
 
   /* -- Typography -------------------------------------------------------- */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -158,13 +175,52 @@
     border-width: 0;
   }
 
-  /* A faint hairline grid, used once, behind the hero only. */
+  /* A faint hairline grid, used behind hero sections only. */
   .hero-grid {
     background-image:
-      linear-gradient(to right, rgb(11 18 32 / 0.045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(11 18 32 / 0.045) 1px, transparent 1px);
+      linear-gradient(to right, rgb(18 16 14 / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(18 16 14 / 0.04) 1px, transparent 1px);
     background-size: 56px 56px;
     mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  /*
+   * A soft colour wash for section backgrounds.
+   *
+   * Kept deliberately weak — these sit behind text, and a gradient strong
+   * enough to notice is a gradient strong enough to hurt contrast. It reads as
+   * warmth rather than as decoration.
+   */
+  .wash-accent {
+    background-image:
+      radial-gradient(ellipse 60% 50% at 15% 0%, var(--color-accent-100) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 85% 10%, #fef3e2 0%, transparent 55%);
+  }
+
+  .wash-soft {
+    background-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      var(--color-accent-50) 0%,
+      transparent 70%
+    );
+  }
+
+  /* A gradient rule used to close sections, instead of a hard border. */
+  .rule-fade {
+    height: 1px;
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      var(--color-neutral-border) 15%,
+      var(--color-neutral-border) 85%,
+      transparent
+    );
+  }
+
+  /* Numbers that should read as data rather than prose. */
+  .figure {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
   }
 
   .animate-score-in {

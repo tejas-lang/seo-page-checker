@@ -271,10 +271,14 @@ On-Page SEO score = round(35 / 37 × 35.8) = 34 out of 35`}
           </p>
           <p>
             <strong className="font-semibold text-ink-950">
-              Core Web Vitals or a PageSpeed score.
+              Core Web Vitals — we do not measure these ourselves.
             </strong>{" "}
-            We time one request from one location. That is not a Core Web Vitals measurement, which
-            is built from what real visitors experience over weeks. Use PageSpeed Insights.
+            A report can fetch them live from the Google PageSpeed Insights API, but that is
+            Google&rsquo;s measurement shown under Google&rsquo;s name, not ours. It sits beside the
+            SEO score rather than inside it, for two reasons: the two answer different questions,
+            and Lighthouse results vary between runs while our score is fixed arithmetic that must
+            give the same answer every time. Our own timing figure is just how long one request
+            took from one location, and it is labelled as such.
           </p>
           <p>
             <strong className="font-semibold text-ink-950">

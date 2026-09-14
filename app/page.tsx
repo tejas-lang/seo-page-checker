@@ -20,6 +20,7 @@ import {
   StepCard,
   TrustStrip,
 } from "@/components/marketing/blocks";
+import { ReportPreview } from "@/components/marketing/report-preview";
 import { guides } from "@/content/guides";
 import { checkRegistry, CHECK_COUNT } from "@/lib/seo/registry";
 import { CATEGORY_LABELS, CHECK_CATEGORIES } from "@/lib/seo/types";
@@ -50,8 +51,8 @@ const LIMITATIONS = [
     body: "We do not crawl the web, so we cannot tell you who links to you. Domain Authority and similar figures are vendor-invented metrics, not numbers Google publishes.",
   },
   {
-    title: "Page speed and Core Web Vitals",
-    body: "We measure how long the server took to answer us, once, from one place. That is not a Core Web Vitals score. Use PageSpeed Insights for that.",
+    title: "Page speed — measured by Google, not by us",
+    body: "Reports can pull live Core Web Vitals from the Google PageSpeed Insights API. It is shown separately and clearly attributed, and it never feeds into our score: Google's figures vary between runs, and our score is fixed arithmetic.",
   },
   {
     title: "Whether Google will index your page",
@@ -72,40 +73,49 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       {/* Hero                                                             */}
       {/* ---------------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-b border-neutral-border bg-surface">
+      <section className="wash-accent relative overflow-hidden border-b border-neutral-border">
         <div className="hero-grid pointer-events-none absolute inset-0" aria-hidden="true" />
 
         <Container className="relative">
-          <div className="mx-auto max-w-3xl py-16 text-center sm:py-24">
-            <span className="inline-flex items-center gap-2 rounded-full border border-neutral-border bg-surface px-3 py-1 text-xs font-medium text-ink-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
-              {CHECK_COUNT} checks · no signup · results in seconds
-            </span>
+          <div className="grid items-center gap-12 py-16 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16">
+            {/* Copy + form */}
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-neutral-border bg-surface/80 px-3 py-1 text-xs font-medium text-ink-600 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+                {CHECK_COUNT} checks · no signup · results in seconds
+              </span>
 
-            <h1 className="mt-6 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
-              Check your webpage&rsquo;s SEO in seconds
-            </h1>
+              <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.4rem]">
+                Check your webpage&rsquo;s SEO in{" "}
+                <span className="bg-gradient-to-r from-accent-700 to-accent-500 bg-clip-text text-transparent">
+                  seconds
+                </span>
+              </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-ink-600">
-              Find technical and on-page SEO issues, understand why they matter, and get practical
-              recommendations to improve your page.
-            </p>
+              <p className="mt-5 text-lg leading-relaxed text-ink-600">
+                Find technical and on-page SEO issues, understand why they matter, and get
+                practical recommendations to improve your page.
+              </p>
 
-            {/*
-              Deliberately NOT autofocused.
+              {/*
+                Deliberately NOT autofocused.
 
-              The homepage is a page people read: it has a heading, a
-              description and a skip link. Moving focus into the input on load
-              lands a keyboard or screen reader user in the middle of the page,
-              past the skip link that exists precisely so they can jump the
-              header. /seo-checker does autofocus, because someone who
-              navigated there arrived to do one specific thing.
-            */}
-            <AuditForm className="mx-auto mt-9 max-w-2xl text-left" />
-            <FormFootnote />
+                The homepage is a page people read: it has a heading, a
+                description and a skip link. Moving focus into the input on load
+                lands a keyboard or screen reader user in the middle of the page,
+                past the skip link that exists precisely so they can jump the
+                header. /seo-checker does autofocus, because someone who
+                navigated there arrived to do one specific thing.
+              */}
+              <AuditForm className="mt-8" />
+              <FormFootnote />
+            </div>
+
+            {/* A miniature of the real output, rather than a stock illustration */}
+            <ReportPreview className="hidden lg:block" />
           </div>
 
-          <div className="relative border-t border-neutral-border py-6">
+          <div className="relative border-t border-neutral-border/70 py-6">
             <TrustStrip items={TRUST_ITEMS} />
           </div>
         </Container>
@@ -150,7 +160,7 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       {/* Features                                                         */}
       {/* ---------------------------------------------------------------- */}
-      <section className="border-y border-neutral-border bg-surface py-16 sm:py-20">
+      <section className="wash-soft border-y border-neutral-border bg-surface py-16 sm:py-20">
         <Container>
           <SectionHeading
             label="What gets checked"

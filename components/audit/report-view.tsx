@@ -3,6 +3,8 @@ import { ArrowUpRight, CircleCheck, Clock, ExternalLink, Globe, Printer } from "
 
 import { ScoreGauge, ScoreBar, toneForRatio } from "./score-gauge";
 import { CheckList } from "./check-list";
+import { ScoreComposition } from "./score-composition";
+import { PageSpeedPanel } from "@/components/pagespeed/pagespeed-panel";
 import { CopyButton } from "./copy-button";
 import { SEVERITY_META, StatusIcon } from "./status";
 import { Badge, Card, Container, ButtonLink, Mono } from "@/components/ui";
@@ -242,7 +244,13 @@ export function ReportView({
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {/* The composition bar makes "these add up to the total" visible,
+            which is the claim the table below then proves precisely. */}
+        <Card className="mt-5 px-5 py-5">
+          <ScoreComposition score={report.score} />
+        </Card>
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {report.score.categories.map((category) => (
             <Card key={category.category} className="px-4 py-4 print-block">
               <div className="flex items-baseline justify-between gap-3">
@@ -281,6 +289,11 @@ export function ReportView({
 
         <ScoreExplainer report={report} />
       </section>
+
+      {/* ------------------------------------------------------------- */}
+      {/* Page speed (Google's data, loaded on demand)                  */}
+      {/* ------------------------------------------------------------- */}
+      <PageSpeedPanel url={report.finalUrl} />
 
       {/* ------------------------------------------------------------- */}
       {/* All checks                                                    */}

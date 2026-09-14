@@ -68,9 +68,11 @@ export default function AboutPage() {
           </Principle>
 
           <Principle title="We say what we cannot do">
-            No rankings, no backlinks, no authority score, no Core Web Vitals, no indexing status.
-            Those need data sources this tool does not have, and inventing them would make
-            everything else less trustworthy.
+            No rankings, no backlinks, no authority score, no indexing status. Those need data
+            sources this tool does not have, and inventing them would make everything else less
+            trustworthy. Where we do show outside data — Core Web Vitals, fetched live from
+            Google&rsquo;s PageSpeed Insights API — it carries Google&rsquo;s name and stays out of
+            our score.
           </Principle>
         </div>
       </section>

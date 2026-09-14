@@ -14,8 +14,9 @@ export const metadata: Metadata = {
 
 export default function GuidesIndexPage() {
   return (
-    <Container className="py-12 sm:py-16">
-      <div className="max-w-2xl">
+    <Container className="relative py-12 sm:py-16">
+      <div className="wash-soft pointer-events-none absolute inset-x-0 top-0 h-80" aria-hidden="true" />
+      <div className="relative max-w-2xl">
         <SectionLabel>SEO guides</SectionLabel>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
           Learn what each SEO check means
