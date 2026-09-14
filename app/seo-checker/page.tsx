@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowRight, Lock, Timer, Zap } from "lucide-react";
 
 import { AuditForm } from "@/components/audit/audit-form";
-import { Card, Container, SectionLabel } from "@/components/ui";
+import { Alert, Card, Container, SectionLabel } from "@/components/ui";
+import { isDatabaseConfigured } from "@/lib/db/client";
 import { checkRegistry, CHECK_COUNT } from "@/lib/seo/registry";
 import { CATEGORY_LABELS, CHECK_CATEGORIES } from "@/lib/seo/types";
 import { siteConfig } from "@/lib/config/site";
@@ -35,6 +36,25 @@ export default function SeoCheckerPage() {
           server sent it, and report what we find.
         </p>
       </div>
+
+      {/*
+        A development-only notice. Shown here rather than site-wide because
+        this is the page where a developer is about to create a report that
+        will not survive a restart. It never appears in production.
+      */}
+      {!isDatabaseConfigured() && env.NODE_ENV !== "production" ? (
+        <Alert
+          tone="warning"
+          className="mx-auto mt-8 max-w-2xl"
+          title="No database configured"
+        >
+          <p className="mt-1 leading-relaxed">
+            Reports are being kept in memory and will be lost when the server
+            restarts. Set <code className="font-mono">DATABASE_URL</code> in your{" "}
+            <code className="font-mono">.env</code> file to store them properly. See README.md.
+          </p>
+        </Alert>
+      ) : null}
 
       <AuditForm className="mx-auto mt-9 max-w-2xl" autoFocus />
 

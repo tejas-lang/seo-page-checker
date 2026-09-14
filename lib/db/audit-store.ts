@@ -287,6 +287,21 @@ const memoryStore = new MemoryAuditStore();
 const postgresStore = new PostgresAuditStore();
 
 /**
+ * Say so, loudly, at startup when there is no database.
+ *
+ * Without this an operator can deploy with DATABASE_URL unset, watch the app
+ * work perfectly in a smoke test, and only discover weeks later that every
+ * report vanished on the next restart. A warning in the logs at boot is the
+ * cheapest possible way to prevent that.
+ */
+if (!isDatabaseConfigured()) {
+  logger.warn("db.not_configured", {
+    detail:
+      "DATABASE_URL is not set. Audit reports are being kept in this process's memory: they will be lost on restart and are not shared between server instances. Set DATABASE_URL before deploying to production.",
+  });
+}
+
+/**
  * The active store.
  *
  * When PostgreSQL is configured but a write fails, we log it and fall back to
