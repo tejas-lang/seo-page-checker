@@ -1,0 +1,45 @@
+# Netlify configuration.
+#
+# Netlify detects Next.js and applies its OpenNext-based runtime automatically,
+# so there is no plugin to install. What this file does is set the timing
+# budgets, because serverless functions are killed at a fixed wall-clock limit
+# and the defaults in .env.example assume a long-lived server.
+
+[build]
+  # Migrations run before the build, so the schema is in place the moment the
+  # site goes live. Netlify provisions its managed database before this step,
+  # which is why the connection string is already available here.
+  #
+  # This deliberately uses an npm script rather than shell chaining: `;` is not
+  # a command separator in Windows cmd, so a `cmd; cmd` build command silently
+  # drops everything after the semicolon when built from a Windows machine.
+  # npm scripts run the same way on every platform.
+  command = "npm run netlify:build"
+
+  # `publish` is intentionally not set. The Next.js runtime works out the right
+  # directory itself, and hardcoding it is a common way to get a "publish
+  # directory does not contain expected Next.js build output" failure.
+
+[build.environment]
+  NODE_VERSION = "22"
+
+  # Netlify's synchronous function limit is 10 seconds on the free tier.
+  # These keep a whole audit comfortably inside it:
+  #
+  #   AUDIT_TIMEOUT  total budget for the page + robots.txt + sitemap
+  #   CRAWL_TIMEOUT  the page fetch alone, inside that total
+  #
+  # A slow site therefore returns a clear "took too long to respond" instead of
+  # the function being killed and the user seeing a platform error page.
+  AUDIT_TIMEOUT = "8500"
+  CRAWL_TIMEOUT = "6000"
+
+# Security headers. These mirror next.config.ts so they are present even on
+# responses Netlify serves directly from its edge, such as static assets.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), browsing-topics=()"

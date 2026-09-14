@@ -22,9 +22,11 @@
     "db:push": "prisma db push",
     "postinstall": "prisma generate",
     "db:reset": "prisma migrate reset",
-    "docs:generate": "vite-node -c vitest.config.mts scripts/generate-docs.ts"
+    "docs:generate": "vite-node -c vitest.config.mts scripts/generate-docs.ts",
+    "netlify:build": "prisma migrate deploy && next build"
   },
   "dependencies": {
+    "@netlify/database": "^2.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "cheerio": "^1.2.0",

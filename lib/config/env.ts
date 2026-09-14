@@ -38,6 +38,13 @@ const envSchema = z.object({
   /** PostgreSQL connection string. Optional — see lib/db/audit-store.ts. */
   DATABASE_URL: z.string().optional(),
 
+  /**
+   * Netlify's managed Postgres injects its connection string under this name.
+   * It is read as a fallback so a Netlify deployment needs no manual wiring;
+   * an explicit DATABASE_URL always wins. Other hosts are unaffected.
+   */
+  NETLIFY_DATABASE_URL: z.string().optional(),
+
   /** Public origin of this app, used for canonical URLs and the bot page. */
   APP_URL: z.string().default("http://localhost:3000"),
 
@@ -47,8 +54,22 @@ const envSchema = z.object({
   /** Hard cap on the response body we will read, in bytes. */
   MAX_CRAWL_SIZE: intFromEnv(5 * 1024 * 1024),
 
-  /** Per-request timeout in milliseconds. */
+  /** Per-request timeout in milliseconds, for the page fetch itself. */
   CRAWL_TIMEOUT: intFromEnv(10_000),
+
+  /**
+   * Total budget for one audit, covering the page, robots.txt and the sitemap.
+   *
+   * This exists because the per-request timeouts can stack: a slow page plus a
+   * slow robots.txt plus a slow sitemap could each take their full allowance.
+   * Serverless hosts kill a function at a fixed wall-clock limit (10s on
+   * Netlify's free tier), so an audit must finish inside one number, not three.
+   *
+   * When the budget runs low the supporting requests are skipped and reported
+   * as "unable to determine" — which costs nothing in the score — rather than
+   * the whole audit being killed mid-flight.
+   */
+  AUDIT_TIMEOUT: intFromEnv(20_000),
 
   /** Maximum redirect hops we will follow before giving up. */
   MAX_REDIRECTS: intFromEnv(10),
@@ -83,7 +104,19 @@ function loadEnv() {
   return parsed.data;
 }
 
-export const env = loadEnv();
+const parsedEnv = loadEnv();
+
+/**
+ * The resolved configuration.
+ *
+ * `DATABASE_URL` is normalised here rather than at each call site, so every
+ * consumer — the Prisma client, the audit store, the "is a database
+ * configured?" check — sees one answer regardless of which host supplied it.
+ */
+export const env = {
+  ...parsedEnv,
+  DATABASE_URL: parsedEnv.DATABASE_URL?.trim() || parsedEnv.NETLIFY_DATABASE_URL?.trim() || undefined,
+};
 
 export const isProduction = env.NODE_ENV === "production";
 

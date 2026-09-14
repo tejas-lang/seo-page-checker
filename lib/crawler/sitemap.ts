@@ -101,12 +101,21 @@ function emptyResult(checkedUrls: string[], error: string | null): SitemapResult
 export async function analyzeSitemap(
   auditedUrl: string,
   sitemapsFromRobots: string[],
+  options: { deadline?: number } = {},
 ): Promise<SitemapResult> {
   let origin: string;
   try {
     origin = new URL(auditedUrl).origin;
   } catch {
     return emptyResult([], "The audited URL could not be parsed.");
+  }
+
+  /** Time left in the audit's overall budget, or Infinity when unbounded. */
+  const remaining = () =>
+    options.deadline === undefined ? Number.POSITIVE_INFINITY : options.deadline - Date.now();
+
+  if (remaining() < 500) {
+    return emptyResult([], "The audit ran out of time before a sitemap could be checked.");
   }
 
   const candidates: { url: string; via: "robots.txt" | "convention" }[] = [];
@@ -131,9 +140,19 @@ export async function analyzeSitemap(
   let lastStatus: number | null = null;
 
   for (const candidate of candidates) {
+    // Stop trying further locations once the budget is spent. Whatever we
+    // already learned is kept; the rest is honestly reported as unchecked.
+    if (remaining() < 500) {
+      lastError = lastError ?? "The audit ran out of time before a sitemap could be found.";
+      break;
+    }
+
     checkedUrls.push(candidate.url);
 
-    const response = await fetchText(candidate.url, { maxBytes: 4 * 1024 * 1024, timeoutMs: 8000 });
+    const response = await fetchText(candidate.url, {
+      maxBytes: 4 * 1024 * 1024,
+      timeoutMs: Math.min(8000, remaining()),
+    });
     lastStatus = response.status;
 
     if (!response.ok || !response.text) {

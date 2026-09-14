@@ -24,6 +24,7 @@ import { parseHtml } from "./parser";
 import { checkRegistry } from "./registry";
 import { calculateScore, prioritiseIssues } from "./scoring";
 import { TtlCache } from "@/lib/utils/cache";
+import { env } from "@/lib/config/env";
 import { logger } from "@/lib/logger";
 import type {
   AuditReport,
@@ -85,9 +86,23 @@ export async function runAudit(
   const startedMs = Date.now();
   const stage = options.onStage ?? (() => undefined);
 
+  /**
+   * One wall-clock budget for the whole audit.
+   *
+   * The page fetch, robots.txt and the sitemap each have their own timeout,
+   * and without this they could stack up to three times the expected wait.
+   * Serverless hosts kill a function at a fixed limit, so everything has to
+   * fit inside one number. Supporting requests give up their remaining share
+   * rather than letting the audit be killed with nothing to show.
+   */
+  const deadline = startedMs + env.AUDIT_TIMEOUT;
+  const remaining = () => deadline - Date.now();
+
   /* -- 1. Fetch ------------------------------------------------------- */
   stage("fetching");
-  const fetchResult = await fetchPage(url);
+  const fetchResult = await fetchPage(url, {
+    timeoutMs: Math.min(env.CRAWL_TIMEOUT, Math.max(remaining(), 1000)),
+  });
 
   if (!fetchResult.ok) {
     logger.info("audit.fetch_failed", {
@@ -108,7 +123,9 @@ export async function runAudit(
 
   let robotsDocument = robotsCache.get(origin);
   if (!robotsDocument) {
-    robotsDocument = await fetchRobotsDocument(origin);
+    robotsDocument = await fetchRobotsDocument(origin, {
+      timeoutMs: Math.min(8000, remaining()),
+    });
     // Only cache a definite answer. Caching a failure would make a transient
     // network blip look like a persistent problem for the next five minutes.
     if (robotsDocument.retrieved) robotsCache.set(origin, robotsDocument);
@@ -119,7 +136,7 @@ export async function runAudit(
   const robotsTxt = evaluateRobotsForUrl(robotsDocument, fetchResult.finalUrl);
 
   stage("sitemap");
-  const sitemap = await analyzeSitemap(fetchResult.finalUrl, robotsTxt.sitemaps);
+  const sitemap = await analyzeSitemap(fetchResult.finalUrl, robotsTxt.sitemaps, { deadline });
 
   /* -- 4. Checks ------------------------------------------------------- */
   stage("checks");

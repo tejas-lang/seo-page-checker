@@ -216,10 +216,28 @@ export interface RobotsDocument {
 }
 
 /** Fetch and parse robots.txt for an origin. Contains no per-page state. */
-export async function fetchRobotsDocument(origin: string): Promise<RobotsDocument> {
+export async function fetchRobotsDocument(
+  origin: string,
+  options: { timeoutMs?: number } = {},
+): Promise<RobotsDocument> {
   const robotsUrl = new URL("/robots.txt", origin).href;
+  const timeoutMs = options.timeoutMs ?? 8000;
 
-  const response = await fetchText(robotsUrl, { maxBytes: 512 * 1024, timeoutMs: 8000 });
+  // Too little of the audit's budget left to be worth starting a request that
+  // would only be cut off. Say so rather than reporting a misleading failure.
+  if (timeoutMs < 500) {
+    return {
+      retrieved: false,
+      url: robotsUrl,
+      status: null,
+      error: "The audit ran out of time before robots.txt could be checked.",
+      groups: [],
+      sitemaps: [],
+      hasUnknownDirectives: false,
+    };
+  }
+
+  const response = await fetchText(robotsUrl, { maxBytes: 512 * 1024, timeoutMs });
 
   if (!response.ok) {
     // A 404 is a perfectly valid state meaning "nothing is disallowed".

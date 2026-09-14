@@ -55,6 +55,11 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_APP_URL: baseURL,
       APP_URL: baseURL,
+      // The suite runs more audits than a real person would in an hour, and
+      // they all arrive from one address. Rate limiting itself is covered by
+      // unit tests in tests/unit/rate-limit.test.ts; here it would only make
+      // later tests fail for the wrong reason.
+      RATE_LIMIT_MAX: "1000",
     },
   },
 });

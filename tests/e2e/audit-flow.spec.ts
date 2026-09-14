@@ -34,7 +34,7 @@ test.describe("homepage", () => {
     await page.getByLabel("Webpage URL to analyze").fill("not a url");
     await page.getByRole("button", { name: /analyze seo/i }).click();
 
-    await expect(page.getByRole("alert")).toContainText(/valid public web address/i);
+    await expect(page.locator("#audit-url-error")).toContainText(/valid public web address/i);
     await expect(page).toHaveURL("/");
   });
 
@@ -44,7 +44,7 @@ test.describe("homepage", () => {
     await page.getByLabel("Webpage URL to analyze").fill("http://127.0.0.1/");
     await page.getByRole("button", { name: /analyze seo/i }).click();
 
-    await expect(page.getByRole("alert")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#audit-url-error")).toBeVisible({ timeout: 15_000 });
   });
 });
 
@@ -97,7 +97,7 @@ test.describe("audit", () => {
       .fill("https://this-domain-should-not-exist-9d8f7a6b5c.com");
     await page.getByRole("button", { name: /analyze seo/i }).click();
 
-    await expect(page.getByRole("alert")).toContainText(/could not/i, { timeout: 30_000 });
+    await expect(page.locator("#audit-url-error")).toContainText(/could not/i, { timeout: 30_000 });
   });
 });
 

@@ -9,6 +9,9 @@ import { defineConfig } from "prisma/config";
  */
 const connectionUrl =
   process.env.DATABASE_URL ??
+  // Netlify's managed Postgres injects the connection string under its own
+  // name, so migrations run during a Netlify build without extra wiring.
+  process.env.NETLIFY_DATABASE_URL ??
   "postgresql://user:password@set-DATABASE_URL-in-your-env-file:5432/seo_page_checker";
 
 /**
