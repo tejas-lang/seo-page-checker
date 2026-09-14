@@ -1,0 +1,174 @@
+// Database schema for SEO Page Checker.
+//
+// DESIGN NOTES
+//
+// 1. We store the MINIMUM needed to re-display a report. Never the page's HTML,
+//    never the visitor's IP address, never anything that identifies a person.
+//    See PRIVACY.md and the /privacy page.
+//
+// 2. `Audit.report` holds the complete report object as JSON, and the
+//    `AuditCheck` / `AuditCategoryScore` / `AuditMetadata` tables hold the same
+//    facts as queryable columns. This is deliberate: the JSON is what the UI
+//    renders (one row, no joins, and a historical report keeps the exact score
+//    it was given even if the scoring weights change later), while the tables
+//    make the data queryable for an admin view or aggregate stats. Both are
+//    written in one transaction from one object, so they cannot drift apart.
+//
+// 3. Anonymous audits carry an `expiresAt` and are deleted after the retention
+//    window set by AUDIT_RETENTION_DAYS.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/db/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AuditState {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum CheckState {
+  PASS
+  WARNING
+  ERROR
+  INFO
+  UNAVAILABLE
+}
+
+enum CheckSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFO
+}
+
+/// Reserved for a future accounts feature. Nothing in V1 writes to this table;
+/// it exists so that adding saved history later does not need a data migration.
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  audits Audit[]
+
+  @@map("users")
+}
+
+model Audit {
+  id String @id
+
+  /// The URL as the user submitted it, after normalisation.
+  url String
+  /// Where we ended up after following redirects.
+  finalUrl String?
+
+  state AuditState @default(PENDING)
+
+  /// 0-100. Null when the audit failed before scoring.
+  score     Int?
+  scoreBand String?
+
+  httpStatus    Int?
+  redirectCount Int?
+  durationMs    Int?
+
+  /// Populated only when state is FAILED.
+  errorCode    String?
+  errorMessage String?
+
+  /// The full report object. See design note 2 above.
+  report Json?
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  /// When this record becomes eligible for deletion.
+  expiresAt DateTime?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  checks     AuditCheck[]
+  categories AuditCategoryScore[]
+  metadata   AuditMetadata?
+
+  @@index([createdAt])
+  @@index([expiresAt])
+  @@index([userId])
+  @@map("audits")
+}
+
+model AuditCheck {
+  id      String @id @default(cuid())
+  auditId String
+  audit   Audit  @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  /// One of the CheckCategory values, e.g. "on-page".
+  category String
+  /// The check's stable key from the registry, e.g. "title".
+  checkKey String
+
+  status   CheckState
+  severity CheckSeverity
+
+  /// The short measured fact, e.g. "54 characters".
+  value          String?
+  message        String  @db.Text
+  recommendation String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@unique([auditId, checkKey])
+  @@index([auditId])
+  @@index([checkKey, status])
+  @@map("audit_checks")
+}
+
+model AuditCategoryScore {
+  id      String @id @default(cuid())
+  auditId String
+  audit   Audit  @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  category String
+  score    Int
+  max      Int
+
+  @@unique([auditId, category])
+  @@map("audit_category_scores")
+}
+
+model AuditMetadata {
+  id      String @id @default(cuid())
+  auditId String @unique
+  audit   Audit  @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  httpStatus    Int
+  redirectCount Int
+
+  title                 String?
+  titleLength           Int?
+  metaDescription       String? @db.Text
+  metaDescriptionLength Int?
+  canonical             String?
+
+  h1Count          Int
+  wordCount        Int
+  internalLinks    Int
+  externalLinks    Int
+  imageCount       Int
+  imagesMissingAlt Int
+  schemaCount      Int
+
+  lang      String?
+  isHttps   Boolean
+  isNoindex Boolean
+
+  @@map("audit_metadata")
+}
