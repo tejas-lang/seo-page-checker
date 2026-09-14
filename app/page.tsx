@@ -91,7 +91,17 @@ export default function HomePage() {
               recommendations to improve your page.
             </p>
 
-            <AuditForm className="mx-auto mt-9 max-w-2xl text-left" autoFocus />
+            {/*
+              Deliberately NOT autofocused.
+
+              The homepage is a page people read: it has a heading, a
+              description and a skip link. Moving focus into the input on load
+              lands a keyboard or screen reader user in the middle of the page,
+              past the skip link that exists precisely so they can jump the
+              header. /seo-checker does autofocus, because someone who
+              navigated there arrived to do one specific thing.
+            */}
+            <AuditForm className="mx-auto mt-9 max-w-2xl text-left" />
             <FormFootnote />
           </div>
 
