@@ -1,5 +1,7 @@
 # SEO Page Checker
 
+**Live: <https://seo-page-checker.netlify.app>**
+
 A real, working SEO audit tool. You give it a public webpage address, it fetches
 that page safely, runs 26 technical and on-page checks against the HTML, and
 returns a transparent score with prioritised, plain-language recommendations.
