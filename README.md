@@ -362,9 +362,14 @@ npx playwright install chromium   # once, about 100 MB
 npm run test:e2e
 ```
 
-These build the app, start it, and drive a real browser through the audit flow
-in both desktop and mobile viewports. Two of them fetch `example.com`, so they
-need internet access.
+22 tests, run against both a desktop and a mobile (Pixel 7) viewport — 44 in
+total. They build the app, start it, and drive a real browser through the whole
+flow: submitting the form, watching the streamed progress arrive, rendering a
+report, filtering its results, and confirming the API refuses a private
+address. Three of them fetch real pages, so they need internet access.
+
+They also cover the things unit tests cannot see, such as whether the skip link
+is still the first thing a keyboard user reaches.
 
 ---
 
