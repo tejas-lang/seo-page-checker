@@ -22,8 +22,7 @@
     "db:push": "prisma db push",
     "postinstall": "prisma generate",
     "db:reset": "prisma migrate reset",
-    "docs:generate": "vite-node -c vitest.config.mts scripts/generate-docs.ts",
-    "netlify:build": "prisma migrate deploy && next build"
+    "docs:generate": "vite-node -c vitest.config.mts scripts/generate-docs.ts"
   },
   "dependencies": {
     "@netlify/database": "^2.0.1",

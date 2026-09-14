@@ -6,15 +6,14 @@
 # and the defaults in .env.example assume a long-lived server.
 
 [build]
-  # Migrations run before the build, so the schema is in place the moment the
-  # site goes live. Netlify provisions its managed database before this step,
-  # which is why the connection string is already available here.
-  #
-  # This deliberately uses an npm script rather than shell chaining: `;` is not
-  # a command separator in Windows cmd, so a `cmd; cmd` build command silently
-  # drops everything after the semicolon when built from a Windows machine.
-  # npm scripts run the same way on every platform.
-  command = "npm run netlify:build"
+  command = "npm run build"
+
+  # The schema is NOT applied here. Netlify's managed database keeps its
+  # connection string out of the build environment, so `prisma migrate deploy`
+  # cannot reach it from a build command. Instead Netlify applies the SQL in
+  # netlify/database/migrations/ against that database itself during the
+  # deploy. That file is generated from prisma/schema.prisma, which remains
+  # the single source of truth for the schema.
 
   # `publish` is intentionally not set. The Next.js runtime works out the right
   # directory itself, and hardcoding it is a common way to get a "publish
