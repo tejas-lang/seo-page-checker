@@ -232,6 +232,56 @@ in-memory counters, so the effective limit is higher than configured. For
 accurate limiting, replace the Map in `lib/rate-limit.ts` with Upstash Redis —
 it is the only file that changes.
 
+### Netlify
+
+Works, and is what the committed `netlify.toml` is set up for. Netlify detects
+Next.js and applies its own runtime, so there is no plugin to install. Three
+things are specific to Netlify and worth understanding before you deploy.
+
+**1. Builds must run on Netlify, not on your machine.**
+
+`netlify deploy --build` builds locally, and a local build cannot reach
+Netlify's managed database. Connect the Git repository instead
+(**Project configuration → Build & deploy → Link repository**) so every push
+builds on Netlify's own infrastructure.
+
+**2. The database is provisioned by Netlify, and its URL is deliberately
+hidden.**
+
+Running `netlify db init` adds `@netlify/database` to the project; the database
+itself is created on the first deploy. Its connection string is injected into
+deployed functions as `NETLIFY_DATABASE_URL` — which `lib/config/env.ts` reads
+as a fallback for `DATABASE_URL`, so no wiring is needed.
+
+It is **not** exposed to the build command, and it is not a visible environment
+variable. That means `prisma migrate deploy` cannot run during a Netlify build:
+it resolves the placeholder host, fails, and takes the build with it.
+
+The schema is applied instead through `netlify/database/migrations/`, which
+Netlify runs against that database during deploy. That SQL is generated from
+`prisma/schema.prisma`:
+
+```bash
+npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script
+```
+
+After changing the schema, regenerate both `prisma/migrations/` (for every
+other host) and the Netlify copy. The Prisma schema stays the single source of
+truth; the Netlify file is a mirror.
+
+**3. Functions are killed at 10 seconds.**
+
+`netlify.toml` sets `AUDIT_TIMEOUT=8500` and `CRAWL_TIMEOUT=6000` so a whole
+audit finishes inside that limit and a slow site produces a clear "took too
+long to respond" rather than a platform error page. Measured against real
+sites at these values: example.com 0.8s, MDN 1.5s, Wikipedia 1.2s, BBC News
+1.4s — all still resolving robots.txt and the sitemap.
+
+**One Windows gotcha**, since it cost a deploy: a build command of
+`cmd-a; cmd-b` silently drops everything after the semicolon when built from a
+Windows machine, because `;` is not a command separator in `cmd`. Use an npm
+script rather than shell chaining if you need two steps.
+
 ### Railway, Render, Fly.io
 
 Good fits, arguably better than serverless for this workload. They run a

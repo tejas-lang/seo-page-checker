@@ -22,6 +22,20 @@
 [build.environment]
   NODE_VERSION = "22"
 
+  # The site's own public origin. Used for canonical URLs, the sitemap,
+  # robots.txt and social card metadata. NEXT_PUBLIC_ values are baked in at
+  # build time, so changing this needs a rebuild, not just a restart.
+  #
+  # Getting this wrong leaves an SEO tool serving canonicals that point at
+  # yourdomain.com, which is the kind of thing it exists to catch.
+  NEXT_PUBLIC_APP_URL = "https://seo-page-checker.netlify.app"
+  APP_URL = "https://seo-page-checker.netlify.app"
+
+  # A little more generous than the 5/hour default, because this deployment is
+  # a public demo people are invited to try. Still bounded: the crawler's own
+  # timeouts and size caps are what actually limit the damage.
+  RATE_LIMIT_MAX = "20"
+
   # Netlify's synchronous function limit is 10 seconds on the free tier.
   # These keep a whole audit comfortably inside it:
   #
