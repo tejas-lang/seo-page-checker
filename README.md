@@ -167,15 +167,19 @@ docker run --name seo-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:
 
 ### Creating the tables
 
+An initial migration ships with the repository
+(`prisma/migrations/20260914000000_init/`), so you do not need to generate one.
 Put the connection string in `.env` as `DATABASE_URL`, then:
 
 ```bash
-npm run db:migrate
+npm run db:deploy
 ```
 
-That creates the tables and records the migration so it is applied exactly once
-per environment. On your production database, run `npm run db:deploy` instead —
-it applies existing migrations without trying to create new ones.
+That applies the migration and records it, so it runs exactly once per
+environment. Use this command in production too.
+
+Use `npm run db:migrate` only when you have **changed** `prisma/schema.prisma`
+and need a new migration file. Commit the folder it creates.
 
 ### The commands
 

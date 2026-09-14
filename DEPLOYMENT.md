@@ -47,7 +47,8 @@ Total time: about 20 minutes.
 
 ## Step 2 — Create the tables
 
-From your own machine, with the connection string in `.env`:
+An initial migration ships with the repository, so there is nothing to
+generate. From your own machine, with the connection string in `.env`:
 
 ```bash
 # .env
@@ -57,11 +58,11 @@ DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
 Then:
 
 ```bash
-npm run db:migrate
+npm run db:deploy
 ```
 
-This creates the tables and records the migration. You only do this once per
-database.
+This creates the tables and records the migration as applied. You only do this
+once per database.
 
 To verify it worked:
 
@@ -106,7 +107,7 @@ Then **redeploy**, because `NEXT_PUBLIC_` variables are baked in at build time.
 
 ## Step 4 — Applying migrations on later deploys
 
-When you change `prisma/schema.prisma`, create a migration locally:
+When you change `prisma/schema.prisma`, create a new migration locally:
 
 ```bash
 npm run db:migrate

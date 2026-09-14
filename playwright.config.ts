@@ -43,10 +43,15 @@ export default defineConfig({
   ],
 
   webServer: {
+    // The build runs here rather than being assumed, so the tests can never
+    // pass against a stale .next directory. A cold production build takes a
+    // few minutes on a modest machine, hence the generous timeout — it is a
+    // budget, not a delay, and a warm build starts in seconds.
     command: `npm run build && npm run start -- --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    timeout: 420_000,
+    stdout: "pipe",
     env: {
       NEXT_PUBLIC_APP_URL: baseURL,
       APP_URL: baseURL,
